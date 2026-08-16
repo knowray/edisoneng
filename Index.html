@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EdisonEng.com — Interactive Building Navigator (Concept Demo)</title>
+<style>
+:root{
+  --ink:#172332; --ink2:#223347; --slate:#607184; --line:#dce3e8; --paper:#f5f7f8;
+  --card:#ffffff; --accent:#2f6575; --accent-soft:#edf5f6; --good:#2d7558;
+  --safety:#9c3024; --safety-bg:#fff0ed; --note:#76551f; --note-bg:#fff8e8;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--paper);color:var(--ink)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.demo-banner{background:#3b3019;color:#f5dfb4;text-align:center;font-size:12px;padding:8px 14px}
+.hero{background:linear-gradient(135deg,var(--ink),var(--ink2));color:white;padding:34px 18px 28px;text-align:center}
+.hero .brand{font-size:12px;letter-spacing:1.1px;text-transform:uppercase;color:#9db1bf;margin-bottom:14px}
+.hero h1{font-size:clamp(36px,5.8vw,54px);line-height:1.04;margin:0 auto;width:90%;max-width:980px;font-weight:800;text-align:center}
+.hero h1 span{display:block}
+.hero h1 .hero-line-1{transform:translateX(-16%)}
+.hero h1 .hero-line-2{transform:translateX(0)}
+.hero h1 .hero-line-3{transform:translateX(16%)}
+.hero-audience{margin:18px auto 0;max-width:620px;font-size:13.5px;line-height:1.45;color:#c4d1d9;font-weight:600;text-align:center}
+.shell{max-width:720px;margin:0 auto;padding:22px 16px 56px}
+.hidden{display:none!important}
+.choice-grid{display:grid;grid-template-columns:1fr;gap:14px}
+.choice-card{background:white;border:1px solid var(--line);border-radius:14px;padding:22px;text-align:left;box-shadow:0 4px 14px rgba(27,46,61,.04)}
+.choice-card.primary{border:2px solid var(--accent)}
+.choice-card:hover{transform:translateY(-1px);box-shadow:0 7px 20px rgba(27,46,61,.08)}
+.eyebrow{font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.choice-card h2{font-size:19px;margin:0 0 7px}
+.choice-card p{font-size:13.5px;line-height:1.55;color:var(--slate);margin:0 0 13px}
+.linkish{font-size:13px;color:var(--accent);font-weight:750}
+.disclaimer{background:#edf1f3;color:#627281;border-radius:9px;padding:11px 13px;text-align:center;font-size:11.5px;line-height:1.45;margin-top:18px}
+.flow-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.back{border:0;background:none;color:var(--slate);font-weight:700;font-size:13px;padding:0}
+.step-count{font-size:11px;color:var(--slate);text-transform:uppercase;font-weight:800;letter-spacing:.6px}
+.progress{display:flex;gap:6px;margin-bottom:14px}
+.progress span{height:5px;flex:1;background:var(--line);border-radius:4px}
+.progress span.on{background:var(--accent)}
+.panel{background:white;border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:0 4px 14px rgba(27,46,61,.04)}
+.panel h3{font-size:19px;line-height:1.3;margin:0 0 5px}
+.panel .sub{font-size:13px;line-height:1.45;color:var(--slate);margin-bottom:17px}
+.options{display:grid;gap:9px}
+.option{border:1.5px solid var(--line);background:white;border-radius:10px;padding:13px 14px;text-align:left;font-size:13.5px;color:var(--ink)}
+.option:hover{border-color:#abc2ca}
+.option.selected{border-color:var(--accent);background:var(--accent-soft);font-weight:700}
+.option.check{display:flex;align-items:flex-start;gap:10px}
+.boxmark{width:17px;height:17px;border:1.5px solid #8fa0ad;border-radius:4px;flex:0 0 auto;margin-top:1px}
+.option.selected .boxmark{background:var(--accent);border-color:var(--accent);box-shadow:inset 0 0 0 3px var(--accent-soft)}
+.field{display:grid;gap:7px;margin-bottom:14px}
+.field label{font-size:12px;font-weight:750;color:var(--ink)}
+.field input,.field select,.field textarea{border:1.5px solid var(--line);border-radius:9px;padding:11px 12px;background:white;color:var(--ink);width:100%}
+.field textarea{min-height:86px;resize:vertical}
+.actions{display:flex;gap:9px;margin-top:18px}
+.btn{border:0;border-radius:9px;padding:12px 14px;font-weight:800;font-size:13px}
+.btn.primary{background:var(--ink);color:white;flex:1}
+.btn.primary:disabled{opacity:.35;cursor:not-allowed}
+.btn.secondary{background:white;color:var(--ink);border:1.5px solid var(--line)}
+.safety{background:var(--safety-bg);border:1.5px solid var(--safety);border-radius:14px;padding:20px}
+.safety h3{color:var(--safety);margin:0 0 7px;font-size:18px}
+.safety p{font-size:13px;line-height:1.55;color:#61312a}
+.note{background:var(--note-bg);border-left:4px solid #c79b45;border-radius:7px;padding:11px 12px;color:#654a1d;font-size:12.5px;line-height:1.5;margin-top:14px}
+.snapshot{background:white;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+.snapshot h3{margin:0 0 10px;font-size:16px}
+.flag{border-top:1px solid #edf0f2;padding:10px 0}
+.flag:first-of-type{border-top:0}
+.flag b{display:block;font-size:13px;margin-bottom:2px}
+.flag span{font-size:12.5px;color:var(--slate);line-height:1.45}
+.brief{background:var(--ink);color:white;border-radius:14px;padding:22px;box-shadow:0 6px 18px rgba(23,35,50,.12)}
+.brief .artifact{font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:#91a9b8}
+.brief h2{margin:4px 0 16px;font-size:21px}
+.brief-row{border-top:1px solid #344a60;padding:10px 0}
+.brief-row:first-of-type{border-top:0}
+.k{font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;color:#94abba;margin-bottom:3px}
+.v{font-size:13.5px;line-height:1.5}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{background:var(--accent);border-radius:999px;padding:4px 9px;font-size:11.5px}
+.prep{background:white;border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:14px}
+.prep h3{font-size:14px;margin:0 0 8px}
+.prep ul{padding-left:20px;margin:0}
+.prep li{font-size:13px;color:var(--slate);line-height:1.45;margin:5px 0}
+.modal-backdrop{position:fixed;inset:0;background:rgba(14,25,35,.52);display:flex;align-items:center;justify-content:center;padding:18px;z-index:20}
+.modal{background:white;border-radius:14px;max-width:460px;width:100%;padding:22px;box-shadow:0 18px 55px rgba(0,0,0,.25)}
+.modal h3{margin:0 0 7px}
+.modal p{font-size:13px;color:var(--slate);line-height:1.5}
+footer{text-align:center;color:#7d8b96;font-size:11.5px;padding:0 16px 28px}
+@media(min-width:680px){.choice-grid{grid-template-columns:1.12fr .88fr}.hero h1{font-size:54px;width:90%;max-width:980px}}
+</style>
+</head>
+<body>
+<div class="demo-banner">CONCEPT DEMO — Independent EdisonEng.com prototype. Not an official or endorsed Edison Engineers property.</div>
+<header class="hero">
+  <div class="brand">EdisonEng.com · Interactive Building Navigator</div>
+  <h1>
+    <span class="hero-line-1">Your Building</span>
+    <span class="hero-line-2">Your Concern</span>
+    <span class="hero-line-3">Your Solution</span>
+  </h1>
+  <div class="hero-audience">For Ontario Condominium Boards, Property Managers, and Building Owners</div>
+</header>
+
+<main class="shell">
+  <section id="landing">
+    <div class="choice-grid">
+      <button class="choice-card primary" onclick="startFlow('pathfinder')">
+        <div class="eyebrow">I have a building problem</div>
+        <h2>Building Project Pathfinder</h2>
+        <p>Leaks, concrete, balconies, windows, roofs, garages, building systems, or a project that is not going as planned.</p>
+        <span class="linkish">Solve a building problem →</span>
+      </button>
+      <button class="choice-card" onclick="startFlow('planning')">
+        <div class="eyebrow">I'm planning ahead</div>
+        <h2>Capital Planning Check</h2>
+        <p>Reserve Fund Study timing, changed conditions, major repairs, and upcoming capital decisions.</p>
+        <span class="linkish">Check planning context →</span>
+      </button>
+    </div>
+    <div class="disclaimer">This is a preliminary organization tool only. It is not a Reserve Fund Study, condition assessment, safety determination, or engineering opinion. It does not replace advice from a qualified professional.</div>
+  </section>
+
+  <section id="flow" class="hidden">
+    <div class="flow-top">
+      <button class="back" onclick="goBack()">← Back</button>
+      <div id="stepCount" class="step-count"></div>
+    </div>
+    <div id="progress" class="progress"></div>
+    <div class="panel">
+      <h3 id="qTitle"></h3>
+      <div id="qSub" class="sub"></div>
+      <div id="questionBody"></div>
+      <div class="actions">
+        <button id="nextBtn" class="btn primary" onclick="nextStep()">Next</button>
+      </div>
+    </div>
+    <div class="disclaimer">Preliminary organization only — not a diagnosis, condition assessment, Reserve Fund Study, or engineering opinion.</div>
+  </section>
+
+  <section id="safetyView" class="hidden">
+    <div class="safety">
+      <h3>⚠ Potential immediate safety concern</h3>
+      <p>Do not rely on this tool to assess immediate safety. If you can do so safely, restrict access to the affected area and contact the appropriate emergency service, building authority, or qualified professional for the situation.</p>
+      <div class="actions">
+        <button class="btn secondary" onclick="resetAll()">Start over</button>
+        <button class="btn primary" onclick="continueAfterSafety()">Continue preparing the project brief</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="briefView" class="hidden">
+    <div id="snapshotWrap"></div>
+    <div class="brief">
+      <div class="artifact">Summary artifact</div>
+      <h2>Building Project Brief</h2>
+      <div id="briefRows"></div>
+    </div>
+    <div class="prep">
+      <h3>Information that may help an engineering review</h3>
+      <ul id="prepList"></ul>
+    </div>
+    <div class="actions">
+      <button class="btn secondary" onclick="resetAll()">Start over</button>
+      <button class="btn primary" onclick="openPreview()">Preview Engineering Request</button>
+    </div>
+    <div class="disclaimer">This brief only organizes the information entered in the demonstration. No information is transmitted to Edison Engineers.</div>
+  </section>
+</main>
+
+<div id="modalBackdrop" class="modal-backdrop hidden" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Concept handoff preview</h3>
+    <p>In an authorized production version, this structured brief could accompany an engineering inquiry. This demonstration intentionally does not collect or transmit personal information.</p>
+    <button class="btn primary" style="width:100%;margin-top:8px" onclick="closeModal()">Close preview</button>
+  </div>
+</div>
+
+<footer>EdisonEng.com · Independent concept demonstration</footer>
+
+<script>
+const issueBranches = {
+  water: {
+    label: "Water entering the building / recurring leaks",
+    pathway: ["Water Leak Investigation", "Building Envelope"],
+    questions: [
+      {key:"location", title:"Where is the water being observed?", sub:"Choose the closest location.", type:"single",
+       options:["Around windows or doors","Exterior wall / facade","Roof or ceiling","Balcony / terrace","Parking garage","Several locations","Unsure"]},
+      {key:"extent", title:"How widespread is it?", sub:"Select the closest description.", type:"single",
+       options:["One location / unit","Several locations / units","Common area","Multiple areas / building-wide","Unsure"]},
+      {key:"pattern", title:"What pattern have you noticed?", sub:"This helps organize the history; it does not diagnose the source.", type:"single",
+       options:["During heavy rain","During wind-driven rain","After rainfall","Intermittent regardless of weather","Seasonal","Not enough information yet"]},
+      {key:"history", title:"Has work already been attempted?", sub:"Select the closest match.", type:"single",
+       options:["No previous work","Maintenance / contractor inspected it","Repair attempted but issue remains","Engineer / consultant reviewed it","Multiple attempts have been made","Unsure"]}
+    ],
+    prep:["Photos or video during active leakage, if available","Affected unit numbers or exact locations","Dates and description of previous repair attempts","Relevant drawings or prior reports"]
+  },
+  concrete: {
+    label:"Concrete cracking, deterioration or loose material",
+    pathway:["Structural Restoration", "Condition Assessment"],
+    questions:[
+      {key:"location",title:"Where is the concrete concern?",sub:"",type:"single",options:["Parking garage","Balcony / slab edge","Exterior wall / facade","Interior structural area","Walkway / common area","Multiple locations","Unsure"]},
+      {key:"extent",title:"How widespread does it appear?",sub:"",type:"single",options:["One isolated area","Several localized areas","Multiple floors / zones","Widespread / building-wide","Unsure"]},
+      {key:"condition",title:"What are you observing?",sub:"Select the closest description.",type:"single",options:["Cracking only","Surface deterioration / scaling","Loose or detached concrete","Rust staining / exposed reinforcement","Movement or deformation","Unsure"]},
+      {key:"history",title:"Has it been reviewed or repaired before?",sub:"",type:"single",options:["No","Maintenance / contractor reviewed it","Prior repair exists","Engineer / consultant reviewed it","Multiple repair cycles","Unsure"]}
+    ],
+    prep:["Photos showing the overall area and close-up condition","Location list or marked plans","Previous repair details or invoices","Any prior engineering reports"]
+  },
+  balcony: {
+    label:"Balcony or railing concern",
+    pathway:["Structural Restoration", "Balcony Review"],
+    questions:[
+      {key:"location",title:"What part is involved?",sub:"",type:"single",options:["Balcony slab / edge","Railing / guard","Waterproofing / surface","Balcony-to-wall interface","Multiple components","Unsure"]},
+      {key:"extent",title:"How many areas are affected?",sub:"",type:"single",options:["One balcony","Several balconies","One elevation / stack","Multiple elevations","Unsure"]},
+      {key:"condition",title:"What are you observing?",sub:"",type:"single",options:["Cracking","Loose / deteriorated material","Water staining / leakage","Railing movement / deterioration","Surface or coating failure","Unsure"]},
+      {key:"history",title:"Previous review or repair?",sub:"",type:"single",options:["None","Contractor / maintenance review","Previous repair","Engineer / consultant review","Unsure"]}
+    ],
+    prep:["Photos of affected balconies or railings","Unit / balcony locations","Previous repair or coating information","Relevant inspection or engineering reports"]
+  },
+  windows: {
+    label:"Windows, doors, or exterior wall concern",
+    pathway:["Building Envelope", "Window / Wall Review"],
+    questions:[
+      {key:"location",title:"Where is the concern?",sub:"",type:"single",options:["Windows","Exterior doors","Curtain wall / glazing","Wall cladding / facade","Window-to-wall interface","Multiple areas","Unsure"]},
+      {key:"extent",title:"How widespread is it?",sub:"",type:"single",options:["One opening","Several units","One elevation","Multiple elevations","Building-wide","Unsure"]},
+      {key:"condition",title:"What are you noticing?",sub:"",type:"single",options:["Water ingress","Drafts / air leakage","Condensation","Visible deterioration","Operational problem","Unsure"]},
+      {key:"history",title:"Has repair or replacement been attempted?",sub:"",type:"single",options:["No","Maintenance / sealant repair","Component replacement","Engineer / consultant review","Multiple attempts","Unsure"]}
+    ],
+    prep:["Photos and affected unit locations","Weather conditions when symptoms occur","Previous sealant / window work records","Relevant drawings or reports"]
+  },
+  roof: {
+    label:"Roof issue or planned replacement",
+    pathway:["Roof Review", "Building Envelope"],
+    questions:[
+      {key:"location",title:"What best describes the concern?",sub:"",type:"single",options:["Active roof leak","Recurring ceiling staining","Roof membrane deterioration","Drainage / ponding concern","Planned roof replacement","Multiple concerns","Unsure"]},
+      {key:"extent",title:"What area is affected?",sub:"",type:"single",options:["One localized area","Several roof areas","Large portion of roof","Unknown","Unsure"]},
+      {key:"pattern",title:"When does it occur?",sub:"",type:"single",options:["During rain","After rain / snow melt","Seasonally","Ongoing deterioration, not active leaking","Planning only","Unsure"]},
+      {key:"history",title:"What work has already occurred?",sub:"",type:"single",options:["None known","Temporary repair","Previous roof repair","Previous replacement","Engineer / consultant review","Unsure"]}
+    ],
+    prep:["Roof age / replacement history if known","Leak locations and photos","Previous roofing invoices or warranty information","Relevant drawings or reports"]
+  },
+  garage: {
+    label:"Parking garage concern",
+    pathway:["Structural Restoration", "Parking Garage Review"],
+    questions:[
+      {key:"location",title:"Where is the concern?",sub:"",type:"single",options:["Parking slab","Ramp","Columns / walls","Expansion joint","Waterproofing / drainage","Multiple areas","Unsure"]},
+      {key:"extent",title:"How widespread is it?",sub:"",type:"single",options:["One area","Several areas","One level","Multiple levels","Garage-wide","Unsure"]},
+      {key:"condition",title:"What are you observing?",sub:"",type:"single",options:["Cracking","Concrete deterioration","Water leakage / staining","Corrosion / rust staining","Joint or waterproofing failure","Unsure"]},
+      {key:"history",title:"Previous work or review?",sub:"",type:"single",options:["None","Maintenance repair","Contractor repair","Engineer / consultant review","Major restoration completed previously","Unsure"]}
+    ],
+    prep:["Photos and garage level / bay locations","Repair or restoration history","Any previous condition reports","Relevant plans or Reserve Fund Study references"]
+  },
+  mechanical: {
+    label:"Mechanical or electrical building-system concern",
+    pathway:["Mechanical / Electrical Review"],
+    questions:[
+      {key:"system",title:"Which system is involved?",sub:"",type:"single",options:["Heating / cooling","Ventilation","Domestic water / plumbing","Electrical distribution","Emergency / life-safety building system","Multiple systems","Unsure"]},
+      {key:"extent",title:"What is the operational impact?",sub:"",type:"single",options:["One unit / area","Several units / areas","Common system serving many occupants","Building-wide","Intermittent / unclear"]},
+      {key:"condition",title:"What prompted the inquiry?",sub:"",type:"single",options:["Recurring failure","Capacity / performance concern","Water / leakage issue","Planned replacement","Unexpected shutdown / outage","Unsure"]},
+      {key:"history",title:"Who has looked at it?",sub:"",type:"single",options:["No one yet","Building maintenance","Service contractor","Engineer / consultant","Multiple parties","Unsure"]}
+    ],
+    prep:["System name / equipment information if known","Service contractor reports or invoices","Dates and frequency of failures","Relevant drawings, maintenance records, or previous reports"]
+  },
+  project: {
+    label:"A current repair or restoration project isn't going as planned",
+    pathway:["Project Recovery", "Condo-In-Crisis Discussion"],
+    questions:[
+      {key:"problemType",title:"What is going wrong?",sub:"",type:"multi",options:["Work has stopped or stalled","Costs have increased unexpectedly","Unexpected conditions were discovered","Contractor / consultant dispute","Schedule has materially slipped","Scope no longer matches the original plan","Unsure"]},
+      {key:"stage",title:"What stage is the project in?",sub:"",type:"single",options:["Planning / design","Tender / contractor selection","Construction underway","Partially completed / stalled","Closeout / deficiencies","Unsure"]},
+      {key:"history",title:"Has an independent engineering review occurred?",sub:"",type:"single",options:["No","Yes, limited review","Yes, formal review","Unsure"]}
+    ],
+    prep:["Contract, scope, and current drawings","Change orders and cost summaries","Project correspondence / meeting minutes","Previous engineering reports and Reserve Fund Study references"]
+  },
+  unsure: {
+    label:"Multiple issues / not sure where to start",
+    pathway:["General Condition / Intake Review"],
+    questions:[
+      {key:"area",title:"Which areas are involved?",sub:"Select all that apply.",type:"multi",options:["Water / leaks","Concrete / structure","Balconies","Windows / exterior walls","Roof","Parking garage","Mechanical / electrical","Current project","Other / unsure"]},
+      {key:"extent",title:"How broad is the concern?",sub:"",type:"single",options:["One isolated issue","Several related issues","Multiple building systems / areas","Building-wide planning concern","Unsure"]},
+      {key:"history",title:"Has anyone reviewed the situation previously?",sub:"",type:"single",options:["No","Maintenance / contractor","Engineer / consultant","Several parties","Unsure"]},
+      {key:"goal",title:"What would be most useful next?",sub:"",type:"single",options:["Organize the issues for review","Understand which discipline to contact","Prepare for a board discussion","Review an existing project","Unsure"]}
+    ],
+    prep:["A simple list of issues and locations","Photos or maintenance records","Any existing reports or proposals","Reserve Fund Study if relevant"]
+  }
+};
+
+const issueOptions = [
+  ["water","Water entering the building / recurring leaks"],
+  ["concrete","Concrete cracking, deterioration or loose material"],
+  ["balcony","Balcony or railing concern"],
+  ["windows","Windows, doors, or exterior wall concern"],
+  ["roof","Roof issue or planned replacement"],
+  ["garage","Parking garage concern"],
+  ["mechanical","Mechanical / electrical building-system concern"],
+  ["project","A current repair / restoration project isn't going as planned"],
+  ["unsure","Multiple issues / I'm not sure"]
+];
+
+const safetyQuestion = {
+  key:"safety", title:"Before continuing, are any immediate hazards present?", sub:"Choose Yes only for obvious conditions such as falling material, visible structural collapse or movement, fire/smoke, exposed energized equipment, or active flooding near electrical systems.", type:"single",
+  options:["No obvious immediate hazard of that type","Yes — one of those immediate hazards may be present"]
+};
+
+const docsQuestion = {
+  key:"availableDocs", title:"What information could be available for an engineering review?", sub:"Select all that apply.", type:"multi",
+  options:["Photos / videos","Previous engineering report","Contractor proposal / invoice","Drawings","Reserve Fund Study","Inspection / maintenance records","Project correspondence","None yet / unsure"]
+};
+
+const planningQuestions = [
+  {key:"propertyType",title:"What type of property is this?",sub:"",type:"single",options:["High-rise condominium","Mid-rise condominium","Low-rise / townhouse condominium","Commercial / institutional building","Mixed-use property","Other / unsure"]},
+  {key:"yearBuilt",title:"Approximately when was the building constructed?",sub:"Choose the closest range.",type:"single",options:["2016 or newer","2001–2015","1986–2000","1971–1985","1970 or earlier","Unsure"]},
+  {key:"units",title:"Approximately how many units are involved?",sub:"",type:"single",options:["Under 25","25–75","76–150","151–300","300+","Not applicable / unsure"]},
+  {key:"rfsTiming",title:"When was the most recent Reserve Fund Study completed?",sub:"",type:"single",options:["Within the last year","1–2 years ago","About 3 years ago","More than 3 years ago","Unsure / don't know"]},
+  {key:"rfsClass",title:"Do you know the study class?",sub:"Select the closest answer.",type:"single",options:["Class 1","Class 2","Class 3","Don't know"]},
+  {key:"changed",title:"What has changed since the most recent study?",sub:"Select all that apply.",type:"multi",options:["Significant repair completed","Unplanned repair occurred","Repair needed earlier than expected","Project cost materially higher than expected","New building-condition issue appeared","Nothing significant / unsure"]},
+  {key:"upcoming",title:"Is significant work expected within the next five years?",sub:"Select all that apply.",type:"multi",options:["Roof","Parking garage","Windows / exterior walls","Balconies","Mechanical / electrical systems","Other major project","None known / unsure"]},
+  {key:"reason",title:"Why are you checking now?",sub:"Select the closest reason.",type:"single",options:["Preparing for upcoming capital work","Reviewing Reserve Fund Study timing","Board wants clarity before a decision","Special assessment is being discussed","Existing plan may not reflect current conditions","Coordinating several future projects","Unsure"]}
+];
+
+let mode = null;
+let steps = [];
+let stepIndex = 0;
+let state = {};
+let safetyAcknowledged = false;
+
+function showOnly(id){
+  ["landing","flow","safetyView","briefView"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id));
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function startFlow(which){
+  mode = which; state = {}; stepIndex = 0; safetyAcknowledged = false;
+  if(which==="pathfinder"){
+    steps = [
+      {key:"issue",title:"What best describes the reason you're here?",sub:"Start with the problem as you see it — no engineering vocabulary needed.",type:"issue"}
+    ];
+  } else {
+    steps = [...planningQuestions, docsQuestion];
+  }
+  showOnly("flow");
+  renderStep();
+  requestAnimationFrame(() => {
+    document.getElementById("flow").scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  });
+}
+
+function branchAfterIssue(issueKey){
+  safetyAcknowledged = false;
+  state = { issue: state.issue };
+  const branch = issueBranches[issueKey];
+  steps = [
+    steps[0],
+    safetyQuestion,
+    ...branch.questions,
+    docsQuestion,
+    {key:"context",title:"Anything else worth noting?",sub:"Optional. Keep it brief; this will simply be included in the Project Brief.",type:"text",optional:true}
+  ];
+}
+
+function renderStep(){
+  const q = steps[stepIndex];
+  document.getElementById("stepCount").textContent = `Step ${stepIndex+1} of ${steps.length}`;
+  document.getElementById("qTitle").textContent = q.title;
+  document.getElementById("qSub").textContent = q.sub || "";
+  document.getElementById("progress").innerHTML = steps.map((_,i)=>`<span class="${i<=stepIndex?"on":""}"></span>`).join("");
+  const body = document.getElementById("questionBody");
+  body.innerHTML = "";
+
+  if(q.type==="issue"){
+    const wrap=document.createElement("div");wrap.className="options";
+    issueOptions.forEach(([key,label])=>{
+      const b=document.createElement("button");b.className="option"+(state.issue===key?" selected":"");
+      b.textContent=label;b.onclick=()=>{state.issue=key;branchAfterIssue(key);renderStep()};wrap.appendChild(b);
+    });
+    body.appendChild(wrap);
+  } else if(q.type==="single"){
+    const wrap=document.createElement("div");wrap.className="options";
+    q.options.forEach(opt=>{
+      const b=document.createElement("button");b.className="option"+(state[q.key]===opt?" selected":"");b.textContent=opt;
+      b.onclick=()=>{state[q.key]=opt;renderStep()};wrap.appendChild(b);
+    });body.appendChild(wrap);
+  } else if(q.type==="multi"){
+    const wrap=document.createElement("div");wrap.className="options";const vals=state[q.key]||[];
+    q.options.forEach(opt=>{
+      const b=document.createElement("button");b.className="option check"+(vals.includes(opt)?" selected":"");
+      b.innerHTML=`<span class="boxmark"></span><span>${opt}</span>`;
+      b.onclick=()=>{
+        const exclusiveNoneOptions = new Set([
+          "None yet / unsure",
+          "Nothing significant / unsure",
+          "None known / unsure"
+        ]);
+        const arr = state[q.key] || [];
+
+        if (exclusiveNoneOptions.has(opt)) {
+          state[q.key] = arr.includes(opt) ? [] : [opt];
+        } else {
+          const withoutNone = arr.filter(x => !exclusiveNoneOptions.has(x));
+          state[q.key] = withoutNone.includes(opt)
+            ? withoutNone.filter(x => x !== opt)
+            : [...withoutNone, opt];
+        }
+        renderStep()
+      };wrap.appendChild(b);
+    });body.appendChild(wrap);
+  } else if(q.type==="text"){
+    const f=document.createElement("div");f.className="field";
+    const ta=document.createElement("textarea");ta.placeholder="Optional context";ta.value=state[q.key]||"";
+    ta.oninput=e=>{state[q.key]=e.target.value;updateNext()};f.appendChild(ta);body.appendChild(f);
+  }
+  updateNext();
+}
+
+function currentAnswered(){
+  const q=steps[stepIndex];
+  if(q.optional) return true;
+  const v=state[q.key];
+  if(q.type==="multi") return Array.isArray(v)&&v.length>0;
+  return !!v;
+}
+function updateNext(){
+  const btn=document.getElementById("nextBtn");btn.disabled=!currentAnswered();
+  btn.textContent=stepIndex===steps.length-1?"Create Building Project Brief":"Next";
+}
+function nextStep(){
+  const q=steps[stepIndex];
+  if(q.key==="safety" && state.safety.startsWith("Yes") && !safetyAcknowledged){showOnly("safetyView");return}
+  if(stepIndex<steps.length-1){stepIndex++;renderStep()} else {buildBrief()}
+}
+function continueAfterSafety(){safetyAcknowledged=true;stepIndex++;showOnly("flow");renderStep()}
+function goBack(){
+  if(stepIndex===0){resetAll();return}
+  stepIndex--;renderStep()
+}
+function resetAll(){mode=null;steps=[];state={};stepIndex=0;safetyAcknowledged=false;showOnly("landing")}
+
+function addRow(label,value){
+  return `<div class="brief-row"><div class="k">${label}</div><div class="v">${escapeHtml(value||"—")}</div></div>`;
+}
+function addTags(label,tags){
+  return `<div class="brief-row"><div class="k">${label}</div><div class="tags">${tags.map(x=>`<span class="tag">${escapeHtml(x)}</span>`).join("")}</div></div>`;
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+
+function planningSnapshot(){
+  const flags=[];
+  if(["About 3 years ago","More than 3 years ago","Unsure / don't know"].includes(state.rfsTiming)){
+    flags.push(["Study timing worth reviewing","The timing entered suggests the board may benefit from confirming the current Reserve Fund Study update status."]);
+  }
+  const changed=(state.changed||[]).filter(x=>x!=="Nothing significant / unsure");
+  if(changed.length) flags.push(["Changed conditions noted","One or more repairs, costs, or building conditions have changed since the most recent study."]);
+  const up=(state.upcoming||[]).filter(x=>x!=="None known / unsure");
+  if(up.length) flags.push(["Major project coordination","Significant work appears within the current planning horizon and may be worth coordinating with the existing capital plan."]);
+  if(["Special assessment is being discussed","Existing plan may not reflect current conditions","Coordinating several future projects"].includes(state.reason)){
+    flags.push(["Planning discussion recommended","The reason selected suggests value in a focused professional planning discussion."]);
+  }
+  if(!flags.length) flags.push(["Routine planning context","No major changed-condition trigger was identified in this short intake. The Project Brief still provides a structured starting point for discussion."]);
+  return flags.slice(0,3);
+}
+
+function buildBrief(){
+  let rows="",prep=[],snapshot="";
+  if(mode==="pathfinder"){
+    const branch=issueBranches[state.issue];
+    rows+=addRow("Inquiry type","Building Project Pathfinder");
+    rows+=addRow("Reason for inquiry",branch.label);
+    const reserved=new Set(["issue","safety","availableDocs","context"]);
+    branch.questions.forEach(q=>{
+      if(!reserved.has(q.key)){
+        const val=Array.isArray(state[q.key])?state[q.key].join("; "):state[q.key];
+        rows+=addRow(q.title.replace(/\?$/,""),val);
+      }
+    });
+    if(state.context) rows+=addRow("Additional context",state.context);
+    rows+=addRow("Information available",(state.availableDocs||[]).join("; "));
+    rows+=addTags("Potential engineering discussion",branch.pathway);
+    prep=branch.prep;
+  } else {
+    const flags=planningSnapshot();
+    snapshot=`<div class="snapshot"><h3>Capital Planning Snapshot</h3>${flags.map(([a,b])=>`<div class="flag"><b>${a}</b><span>${b}</span></div>`).join("")}</div>`;
+    rows+=addRow("Inquiry type","Capital Planning Check");
+    rows+=addRow("Property type",state.propertyType);
+    rows+=addRow("Approximate building age",state.yearBuilt);
+    rows+=addRow("Approximate units",state.units);
+    rows+=addRow("Reserve Fund Study timing",state.rfsTiming);
+    rows+=addRow("Study class",state.rfsClass);
+    rows+=addRow("Changed conditions",(state.changed||[]).join("; "));
+    rows+=addRow("Upcoming major work",(state.upcoming||[]).join("; "));
+    rows+=addRow("Reason for checking",state.reason);
+    rows+=addRow("Information available",(state.availableDocs||[]).join("; "));
+    const tags=["Reserve Fund / Capital Planning Review"];
+    const meaningfulUpcoming=(state.upcoming||[]).filter(x=>x!=="None known / unsure");
+    if(meaningfulUpcoming.length) tags.push("Major Project Planning");
+    rows+=addTags("Potential engineering discussion",tags);
+    prep=["Current Reserve Fund Study, if available","Recent board / AGM notes related to upcoming projects","Known project scopes, estimates, or recent repair information","Prior engineering reports relevant to changed conditions"];
+  }
+  document.getElementById("snapshotWrap").innerHTML=snapshot;
+  document.getElementById("briefRows").innerHTML=rows;
+  document.getElementById("prepList").innerHTML=prep.map(x=>`<li>${escapeHtml(x)}</li>`).join("");
+  showOnly("briefView");
+}
+
+function openPreview(){document.getElementById("modalBackdrop").classList.remove("hidden")}
+function closeModal(e){if(e&&e.target!==document.getElementById("modalBackdrop"))return;document.getElementById("modalBackdrop").classList.add("hidden")}
+</script>
+</body>
+</html>
